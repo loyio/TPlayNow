@@ -81,6 +81,7 @@ public:
 
 	void emulateLongComputationOp( unsigned int duration_sec, const std::string& raw_ip_address, unsigned short port_num, Callback callback, unsigned int request_id){
 		std::string request = "EMULATE_LONG_CALC_OP " + std::to_string(duration_sec) + "\n";
+        std::cout << "Request: " << request << std::endl;
 
 		std::shared_ptr<Session> session = std::shared_ptr<Session> (new Session(m_ios, raw_ip_address, port_num, request, request_id, callback));
 
@@ -117,7 +118,7 @@ public:
                     onRequestComplete(session);
                     return;
                 }
-
+                
                 asio::async_read_until(session->m_sock, session->m_response_buf, '\n',
                                        [this, session](const boost::system::error_code &ec,
                                                        std::size_t bytes_transferred) {
@@ -210,7 +211,7 @@ int main(){
         // emulate the user's behavior
         client.emulateLongComputationOp(10, "127.0.0.1", 3333, handler, 1);
 
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(60));
 
         // another request with id 2
         client.emulateLongComputationOp(11, "127.0.0.1", 3334, handler, 2);

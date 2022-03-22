@@ -42,6 +42,11 @@ public:
             asio::streambuf request;
             asio::read_until(sock, request, '\n');
 
+            std::istream is(&request);
+            std::string line;
+            std::getline(is, line);
+            std::cout << "request: " << line << std::endl;
+
             // Emulate request processing
             int i = 0;
             while(i != 300){
