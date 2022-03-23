@@ -211,10 +211,10 @@ int main(){
         // emulate the user's behavior
         client.emulateLongComputationOp(10, "127.0.0.1", 3333, handler, 1);
 
-        std::this_thread::sleep_for(std::chrono::seconds(60));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
 
         // another request with id 2
-        client.emulateLongComputationOp(11, "127.0.0.1", 3334, handler, 2);
+        client.emulateLongComputationOp(11, "127.0.0.1", 3333, handler, 2);
 
         // cancel request 1
         client.cancelRequest(1);
@@ -222,7 +222,7 @@ int main(){
         std::this_thread::sleep_for(std::chrono::seconds(6));
 
         // another request with id 3
-        client.emulateLongComputationOp(12, "127.0.0.1", 3335, handler, 3);
+        client.emulateLongComputationOp(12, "127.0.0.1", 3333, handler, 3);
 
         std::this_thread::sleep_for(std::chrono::seconds(15));
 

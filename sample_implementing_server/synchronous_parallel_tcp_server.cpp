@@ -49,7 +49,7 @@ private:
         try{
             std::string request;
             asio::read_until(*sock.get(), boost::asio::dynamic_buffer(request), '\n');
-
+            std::cout << "request = " << request << std::endl;
             int i = 0;
             while(i != 100){
                 i++;

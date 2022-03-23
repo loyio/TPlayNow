@@ -37,24 +37,20 @@ public:
     Service(std::shared_ptr<asio::ip::tcp::socket> sock) : m_sock(sock) {}
 
     void StartHandling() {
-        asio::async_read_until(*m_sock.get(), m_request, '\n', [this](const boost::system::error_code& ec, std::size_t bytes_transferred){
+        asio::async_read_until(*m_sock.get(), asio::dynamic_buffer(m_request), '\n', [this](const boost::system::error_code& ec, std::size_t bytes_transferred){
             onRequestReceived(ec, bytes_transferred);
         });
-        std::istream is(&m_request);
-        std::string line;
-        std::getline(is, line);
-        std::cout << "m_request: " << line << std::endl;
+        std::cout << "m_request : " << m_request << std::endl;
     }
 
 private:
     void onRequestReceived(const boost::system::error_code& ec, std::size_t bytes_transfered){
-        std::cout << "ec.value : " << ec.value() << std::endl;
         if (ec.value() != 0){
             std::cout << "Error occurred! Error code = " << ec.value() << ".Message: " << ec.message();
             onFinish();
             return;
         }
-
+        m_response = ProcessingRequest(m_request);
         // Process the request
         asio::async_write(*m_sock.get(), asio::buffer(m_response), [this](const boost::system::error_code& ec, std::size_t bytes_transferred){
             onResponseSent(ec, bytes_transferred);
@@ -74,7 +70,7 @@ private:
         delete this;
     }
 
-    std::string ProcessingRequest(asio::streambuf& request){
+    std::string ProcessingRequest(std::string request){
         // parse the request, process it and prepare the request
 
         // Emulating CPU-consuming operations
@@ -90,7 +86,7 @@ private:
 
     std::shared_ptr<asio::ip::tcp::socket> m_sock;
     std::string m_response;
-    asio::streambuf m_request;
+    std::string m_request;
 };
 
 
