@@ -9,5 +9,5 @@ include_directories(/opt/homebrew/Cellar/boost/1.78.0_1/include)
 include_directories(.)
 
 add_executable(TMsgNow
-        t_msg_client.cpp
-        t_msg_server.cpp)
+        client.cpp
+        server.cpp)
