@@ -13,11 +13,13 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/network/client.cpp \
+    src/qasioeventdispatcher.cpp
 
 HEADERS += \
     src/include/loginwindow.h \
     src/include/mainwindow.h \
     src/include/chat_message.hpp \
+    src/include/qasioeventdispatcher.hpp \
     src/include/utils.hpp
 
 FORMS += \

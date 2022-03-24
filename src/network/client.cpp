@@ -100,19 +100,12 @@ private:
       {
         std::cout << "Connect error: " << ec.message() << "\n";
 
-        throw std::invalid_argument("Connect Error: ");
-
-        // We need to close the socket used in the previous connection attempt
-        // before starting a new one.
+        throw std::invalid_argument("Connect Error");
         socket_.close();
 
         // Try the next available endpoint.
         do_connect(++endpoint_iter);
-      }
-
-      // Otherwise we have successfully established a connection.
-      else
-      {
+      }else{
         std::cout << "Connected to " << endpoint_iter->endpoint() << "\n";
 
         // Start the input actor.

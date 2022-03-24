@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ********************************************************************/
 #include "include/loginwindow.h"
+#include "include/mainwindow.h"
 #include "include/utils.hpp"
 #include "ui_loginwindow.h"
 #include "network/client.cpp"
@@ -59,7 +60,8 @@ void LoginWindow::on_pbtn_enter_clicked()
 
           c.start(endpoints);
 
-          io_context.run();
+          MainWindow w;
+          w.show();
       }
     }
     catch (std::exception& e){
