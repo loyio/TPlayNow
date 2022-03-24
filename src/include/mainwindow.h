@@ -21,27 +21,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ********************************************************************/
-#include "include/mainwindow.h"
-#include "include/loginwindow.h"
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-#include <QApplication>
-#include <QLocale>
-#include <QTranslator>
+#include <QMainWindow>
 
-int main(int argc, char *argv[])
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
+class MainWindow : public QMainWindow
 {
-    QApplication a(argc, argv);
+    Q_OBJECT
 
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
-    for (const QString &locale : uiLanguages) {
-        const QString baseName = "TMsgNow_" + QLocale(locale).name();
-        if (translator.load(":/i18n/" + baseName)) {
-            a.installTranslator(&translator);
-            break;
-        }
-    }
-    LoginWindow w;
-    w.show();
-    return a.exec();
-}
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private:
+    Ui::MainWindow *ui;
+};
+#endif // MAINWINDOW_H

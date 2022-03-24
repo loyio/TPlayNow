@@ -21,27 +21,51 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ********************************************************************/
-#include "include/mainwindow.h"
 #include "include/loginwindow.h"
+#include "include/utils.hpp"
+#include "ui_loginwindow.h"
+#include "network/client.cpp"
 
-#include <QApplication>
-#include <QLocale>
-#include <QTranslator>
-
-int main(int argc, char *argv[])
+LoginWindow::LoginWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::LoginWindow)
 {
-    QApplication a(argc, argv);
-
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
-    for (const QString &locale : uiLanguages) {
-        const QString baseName = "TMsgNow_" + QLocale(locale).name();
-        if (translator.load(":/i18n/" + baseName)) {
-            a.installTranslator(&translator);
-            break;
-        }
-    }
-    LoginWindow w;
-    w.show();
-    return a.exec();
+    ui->setupUi(this);
 }
+
+LoginWindow::~LoginWindow()
+{
+    delete ui;
+}
+
+
+
+void LoginWindow::on_pbtn_enter_clicked()
+{
+    try{
+        QString ipaddress = ui->lineEdit_ipaddr->text();
+        QString portnum = ui->lineEdit_port->text();
+      if (ipaddress == "" || portnum == ""){
+          ui->statusbar->setStyleSheet("color: red");
+          ui->statusbar->showMessage("Please input the ip address and port number!!!");
+      }else{
+
+          boost::asio::io_context io_context;
+
+          tcp::resolver resolver(io_context);
+          auto endpoints = resolver.resolve(ipaddress.toStdString(), portnum.toStdString());
+
+          chat_client c(io_context);
+
+          c.start(endpoints);
+
+          io_context.run();
+      }
+    }
+    catch (std::exception& e){
+        ui->statusbar->setStyleSheet("color: red");
+        QString errMsg = e.what();
+        ui->statusbar->showMessage(errMsg);
+    }
+}
+

@@ -21,27 +21,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ********************************************************************/
-#include "include/mainwindow.h"
-#include "include/loginwindow.h"
+#ifndef LOGINWINDOW_H
+#define LOGINWINDOW_H
 
-#include <QApplication>
-#include <QLocale>
-#include <QTranslator>
+#include <QMainWindow>
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
-    for (const QString &locale : uiLanguages) {
-        const QString baseName = "TMsgNow_" + QLocale(locale).name();
-        if (translator.load(":/i18n/" + baseName)) {
-            a.installTranslator(&translator);
-            break;
-        }
-    }
-    LoginWindow w;
-    w.show();
-    return a.exec();
+namespace Ui {
+class LoginWindow;
 }
+
+class LoginWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit LoginWindow(QWidget *parent = nullptr);
+    ~LoginWindow();
+
+private slots:
+    void on_pbtn_enter_clicked();
+
+private:
+    Ui::LoginWindow *ui;
+};
+
+#endif // LOGINWINDOW_H

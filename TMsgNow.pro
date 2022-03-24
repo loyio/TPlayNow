@@ -9,15 +9,20 @@ CONFIG += c++20
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/loginwindow.cpp \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/network/client.cpp \
 
 HEADERS += \
-    src/mainwindow.h
+    src/include/loginwindow.h \
+    src/include/mainwindow.h \
+    src/include/chat_message.hpp \
+    src/include/utils.hpp
 
 FORMS += \
-    src/LoginRegForm.ui \
-    src/mainwindow.ui
+    src/ui/loginwindow.ui \
+    src/ui/mainwindow.ui
 
 TRANSLATIONS += \
     translations/TMsgNow_zh_HK.ts
