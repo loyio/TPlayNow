@@ -1,7 +1,7 @@
 #ifndef QASIOEVENTDISPATCHER_HPP
 #define QASIOEVENTDISPATCHER_HPP
 #include "QtCore/qabstracteventdispatcher.h"
-#include "private/qabstracteventdispatcher_p.h"
+// #include "private/qabstracteventdispatcher_p.h"
 #include <QAbstractEventDispatcher>
 
 /*

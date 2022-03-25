@@ -27,7 +27,7 @@ FORMS += \
     src/ui/mainwindow.ui
 
 TRANSLATIONS += \
-    translations/TMsgNow_zh_HK.ts
+    translations/TPlayNow_zh_HK.ts
 CONFIG += lrelease
 CONFIG += embed_translations
 

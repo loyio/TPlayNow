@@ -4,7 +4,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/bind.hpp>
 
-#include <qpa/qwindowsysteminterface.h>
+// #include <qpa/qwindowsysteminterface.h>
 //#include "qplatformdefs.h"
 
 #include "qcoreapplication.h"
@@ -13,7 +13,7 @@
 #include "qthread.h"
 #include "qelapsedtimer.h"
 
-#include "private/qtimerinfo_unix_p.h"
+// #include "private/qtimerinfo_unix_p.h"
 
 #define LOG(expr) #expr": " << (expr) << "; "
 
