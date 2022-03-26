@@ -10,7 +10,6 @@
 # Precompiled Headers
 *.gch
 *.pch
-
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -42,3 +41,13 @@ cmake-build-debug
 
 # Qt
 TPlayNow.pro.user
+
+# cmake
+*.cmake
+Makefile
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+#clangd
+.cache
