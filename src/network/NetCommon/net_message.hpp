@@ -24,8 +24,10 @@ SOFTWARE.
 #pragma once
 #include "net_common.hpp"
 
-namespace tplayn{
-    namespace net{
+namespace tplayn
+{
+    namespace net
+    {
         // Message Header sent at start, templete allow up to use "Enum class" to ensure message valid
         template <typename T>
         struct message_header{
@@ -44,7 +46,66 @@ namespace tplayn{
 
             friend std::ostream& operator << (std::ostream& os, const message<T>& msg){
                 os << "ID: " << int(msg.header.id) << " Size: " << msg.header.size;
+                return os;
+            }
+
+            // pushes any pod-like data into the message buffer
+            template<typename DataType>
+            friend message<T>& operator << (message<T>& msg, const DataType& data){
+                static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pushed into vector");
+
+                // Cache current size of vector by the size of the data being pushed
+                size_t i = msg.body.size();
+
+                // resize the vector
+                msg.body.resize(msg.body.size() + sizeof(DataType));
+
+                // Physically copy the data into the newly allocated vector space
+                std::memcpy(msg.body.data() + i, &data, sizeof(DataType));
+
+                // Recalculate the message size
+                msg.header.size = msg.size();
+
+                return msg;
+            }
+
+            template<typename DataType>
+            friend message<T>& operator >> (message<T>& msg, DataType& data){
+                // Check that the type of the data being pushed is trivially copyable
+                static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pushed into vector");
+
+                size_t i = msg.body.size() - sizeof(DataType);
+
+                // copy the data from the vector to user variable
+                std::memcpy(&data, msg.body.data() + i, sizeof(DataType));
+
+                // shrink the vector to remove read type, and reset end position
+                msg.body.resize(i);
+
+                msg.header.size = msg.size();
+
+                return msg;
             }
         };
+
+
+        // Connection
+        template <typename T>
+        class connection;
+
+
+        template <typename T>
+        struct owned_message{
+            std::shared_ptr<connection<T>> remote = nullptr;
+            message<T> msg;
+
+
+            // string maker
+            friend std::ostream& operator<<(std::ostream& os, const owned_message<T>& msg){
+                os << msg.msg;
+                return os;
+            }
+        };
+
     }
 }
