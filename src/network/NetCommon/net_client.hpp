@@ -13,6 +13,7 @@ namespace tplayn
     {
         template <typename T>
         class client_interface{
+        public:
             client_interface() : m_socket(m_ioc) {}
 
             virtual ~client_interface() { Disconnect(); }
@@ -22,11 +23,15 @@ namespace tplayn
 
             bool Connect(const std::string& host, const uint16_t port){
                 try{
-                    m_connection = std::make_unique<connection<T>>();
-                    
                     // resolve the ipaddress into tangiable physical address
                     boost::asio::ip::tcp::resolver resolver(m_ioc);
                     boost::asio::ip::tcp::resolver::results_type m_endpoints = resolver.resolve(host, std::to_string(port));
+
+                    m_connection = std::make_unique<connection<T>>(
+                            connection<T>::owner::client,
+                            m_ioc,
+                            boost::asio::ip::tcp::socket(m_ioc),
+                            m_qMessageIn);
 
                     // connect to server
                     m_connection->ConnectToServer(m_endpoints);

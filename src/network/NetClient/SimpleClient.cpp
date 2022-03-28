@@ -3,23 +3,19 @@
 
 
 enum class CustomMsgTypes : uint32_t{
-    FireBullet,
-    MovePlayer
+    ServerAccept,
+    ServerDeny,
+    ServerPing,
+    MessageAll,
+    ServerMessage,
 };
 
 class CustomClient : public tplayn::net::client_interface<CustomMsgTypes>{
-public:
-    bool FireBullet(float x, float y){
-        tplayn::net::message<CustomMsgTypes> msg;
-        msg.header.id = CustomMsgTypes::FireBullet;
-        msg << x << y;
-        Send(msg);
-    }
+
 };
 
 int main(){
     CustomClient c;
-    c.Connect("localhost", 3333);
-
+    c.Connect("127.0.0.1", 50000);
     return 0;
 }
