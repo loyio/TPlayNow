@@ -24,14 +24,11 @@ namespace tplayn
                     boost::asio::ip::tcp::resolver resolver(m_ioc);
                     boost::asio::ip::tcp::resolver::results_type m_endpoints = resolver.resolve(host, std::to_string(port));
 
-                    m_connection = std::make_unique<connection<T>>(
-                            connection<T>::owner::client,
-                            m_ioc,
-                            boost::asio::ip::tcp::socket(m_ioc),
-                            m_qMessagesIn);
-
-                    // connect to server
-                    m_connection->ConnectToServer(m_endpoints);
+					// Create connection
+					m_connection = std::make_unique<connection<T>>(connection<T>::owner::client, m_ioc, boost::asio::ip::tcp::socket(m_ioc), m_qMessagesIn);
+					
+					// Tell the connection object to connect to server
+					m_connection->ConnectToServer(m_endpoints);
 
                     // Start Context Thread
                     thrContext = std::thread([this]() { m_ioc.run(); });

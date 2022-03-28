@@ -9,7 +9,7 @@
 {
     namespace net
     {
-         template <typename T>
+        template <typename T>
         class server_interface{
         public:
             server_interface(uint16_t port) 
@@ -111,11 +111,17 @@
 
 
             void Update(size_t nMaxMessages = -1, bool bWait = false){
+                std::cout << "It's waiting now " << std::endl;
                 if(bWait) m_qMessagesIn.wait();
+
+                std::cout << "Update Function : " << m_qMessagesIn.front() << std::endl;
 
                 size_t nMessageCount = 0;
                 while(nMessageCount < nMaxMessages && !m_qMessagesIn.empty()){
                     // get the front message
+
+                    std::cout << "Get New Message" << std::endl;
+					
                     auto msg = m_qMessagesIn.pop_front();
 
                     // Pass to message handler
