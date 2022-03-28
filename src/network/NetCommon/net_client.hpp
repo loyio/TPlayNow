@@ -1,10 +1,7 @@
 #pragma once
 
 #include "net_common.hpp"
-#include "net_tsqueue.hpp"
-#include "net_message.hpp"
 #include "net_connection.hpp"
-#include <memory>
 
 
 namespace tplayn
@@ -14,7 +11,7 @@ namespace tplayn
         template <typename T>
         class client_interface{
         public:
-            client_interface() : m_socket(m_ioc) {}
+            client_interface(){}
 
             virtual ~client_interface() { Disconnect(); }
 
@@ -31,7 +28,7 @@ namespace tplayn
                             connection<T>::owner::client,
                             m_ioc,
                             boost::asio::ip::tcp::socket(m_ioc),
-                            m_qMessageIn);
+                            m_qMessagesIn);
 
                     // connect to server
                     m_connection->ConnectToServer(m_endpoints);
@@ -72,10 +69,17 @@ namespace tplayn
                 else 
                     return false;
             }
+        public:
+            // Send message to server
+            void Send(const message<T>& msg){
+                if(IsConnected()){
+                    m_connection->Send(msg);
+                }
+            }
 
             // get queue of messsage from server
             tsqueue<owned_message<T>>& Incoming(){
-                return m_qMessageIn;
+                return m_qMessagesIn;
             }
 
         protected:
@@ -85,15 +89,12 @@ namespace tplayn
             // needs a thread to execute its work commands
             std::thread thrContext;
 
-            // hardware socket connect to the server
-            boost::asio::ip::tcp::socket m_socket;
-
             // the client has a single instance of a "connection" object, which handles data transfer
             std::unique_ptr<connection<T>> m_connection;
 
         private:
             // the thread safe queue of incomming message from server
-            tsqueue<owned_message<T>> m_qMessageIn;
+            tsqueue<owned_message<T>> m_qMessagesIn;
 
         };
     }

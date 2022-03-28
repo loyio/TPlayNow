@@ -36,6 +36,7 @@ namespace tplayn
             void ConnectToClient(uint32_t uid = 0){
                 if(m_nOwnerType == owner::server){
                     if(m_socket.is_open()){
+						std::cout << "Begin to read Header" << std::endl;
                         id = uid;
                         ReadHeader();
                     }
@@ -53,12 +54,13 @@ namespace tplayn
                             });
                 }
 
-            };
+            }
             void Disconnect(){
                 if(IsConnected()){
                     boost::asio::post(m_ioc, [this]() { m_socket.close(); });
                 }
             }
+
             bool IsConnected() const{
                 return m_socket.is_open();
             }
@@ -69,9 +71,11 @@ namespace tplayn
             }
 
         public:
-            bool send(const message<T>& msg){
-                boost::asio::post(m_ioc, [this, msg](){
+            void Send(const message<T>& msg){
+                boost::asio::post(m_ioc, 
+					[this, msg](){
                             bool bWritingMessage = !m_qMessagesOut.empty();
+							std::cout << "Send Message : " << msg << std::endl;
                             m_qMessagesOut.push_back(msg);
                             if(!bWritingMessage){
                                 WriteHeader();
@@ -87,6 +91,8 @@ namespace tplayn
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
                                 if(m_qMessagesOut.front().body.size() > 0){
+									std::cout << "Begin to WriteBody " << std::endl;
+									std::this_thread::sleep_for(std::chrono::seconds(3));
                                     WriteBody();
                                 }else{
                                     m_qMessagesOut.pop_front();
@@ -105,6 +111,20 @@ namespace tplayn
 
             // Async write a message body
             void WriteBody(){
+                boost::asio::async_write(m_socket, boost::asio::buffer(m_qMessagesOut.front().body.data(), m_qMessagesOut.front().body.size()),
+                        [this](std::error_code ec, std::size_t length){
+                            if(!ec){
+								std::cout << "Write body Success ! " << m_qMessagesOut.front() << std::endl;
+                                m_qMessagesOut.pop_front();
+
+                                if(!m_qMessagesOut.empty()){
+                                    WriteHeader();
+                                }
+                            }else{
+                                std::cout << "[" << id << "] Write Body Fail. \n";
+                                m_socket.close();
+                            }
+                        });
             }
 
 
@@ -113,6 +133,7 @@ namespace tplayn
                 boost::asio::async_read(m_socket, boost::asio::buffer(&m_msgTemporaryIn.header, sizeof(message_header<T>)), 
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
+								std::cout << "Read header success ! : " << m_msgTemporaryIn << std::endl;
                                 if(m_msgTemporaryIn.header.size > 0){
                                     m_msgTemporaryIn.body.resize(m_msgTemporaryIn.header.size);
                                     ReadBody();
@@ -129,9 +150,11 @@ namespace tplayn
 
             // Async ready to read a messag body
             void ReadBody(){
+				std::cout << "Begin to read body !!" << m_msgTemporaryIn <<std::endl;
                 boost::asio::async_read(m_socket, boost::asio::buffer(m_msgTemporaryIn.body.data(), m_msgTemporaryIn.body.size()),
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
+								std::cout << "Read Body Success ! " << m_msgTemporaryIn << std::endl;
                                 AddToIncomingMessageQueue();
                             }else{
                                 std::cout << "[" << id << "] Read Body Fail. \n";

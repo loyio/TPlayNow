@@ -13,7 +13,7 @@
         class server_interface{
         public:
             server_interface(uint16_t port) 
-                : m_asioAcceptor(m_ioc, boost::asio::ip::tcp::v4(), port){
+                : m_asioAcceptor(m_ioc, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)){
             }
 
             virtual ~server_interface() { Stop(); }
@@ -32,7 +32,7 @@
                 return true;
             }
 
-            bool Stop(){
+            void Stop(){
                 m_ioc.stop();
 
                 // Clean the thread
@@ -47,11 +47,11 @@
                 m_asioAcceptor.async_accept([this](std::error_code ec, boost::asio::ip::tcp::socket socket){
                     if(!ec){
                         std::cout << "[SERVER] New Connection: " << socket.remote_endpoint() << std::endl;
-                        std::shared_ptr<connection<T>> newconn = std::make_shared<connection<T>>(connection<T>::owner::server, m_ioc, std::move(socket), m_qMessageIn);
+                        std::shared_ptr<connection<T>> newconn = std::make_shared<connection<T>>(connection<T>::owner::server, m_ioc, std::move(socket), m_qMessagesIn);
 
 
                         // Give the user server a chance to deny connection
-                        if(onClientConnect(newconn)){
+                        if(OnClientConnect(newconn)){
                             // connection allow, add to container
                             m_deqConnections.push_back(std::move(newconn));
 
@@ -59,6 +59,8 @@
 
                             std::cout << "[" << m_deqConnections.back()->GetID() << "] Connection Approved" << std::endl;
                         }else{
+						
+							std::cout << "[-----] Connection Denied\n";
                         }
 
                     }else{
@@ -77,7 +79,7 @@
                 if(client && client->IsConnected()){
                     client->Send(msg);
                 }else{
-                    onClientDisconnect(client);
+                    OnClientDisconnect(client);
                     client.reset();
                     m_deqConnections.erase(std::remove(m_deqConnections.begin(), m_deqConnections.end(), client), m_deqConnections.end());
                 }
@@ -85,7 +87,7 @@
             }
 
             // Send message to all client except the ignore client
-            void MessageAllClient(const message<T>& msg, std::shared_ptr<connection<T>> pIgnoreClient = nullptr){
+            void MessageAllClients(const message<T>& msg, std::shared_ptr<connection<T>> pIgnoreClient = nullptr){
 
                 bool bInvalidClientExists = false;
 
@@ -96,8 +98,8 @@
                         }
                     }else{
                         // can't be contacted, assume it has disconnected
-                        onClientDisconnect(client);
-                        client.rese();
+                        OnClientDisconnect(client);
+                        client.reset();
                         bInvalidClientExists = true;
                     }
                 }
@@ -108,11 +110,13 @@
             }
 
 
-            void Update(size_t nMaxMessage = -1){
+            void Update(size_t nMaxMessages = -1, bool bWait = false){
+                if(bWait) m_qMessagesIn.wait();
+
                 size_t nMessageCount = 0;
-                while(nMessageCount < nMaxMessage && !m_qMessageIn.empty()){
+                while(nMessageCount < nMaxMessages && !m_qMessagesIn.empty()){
                     // get the front message
-                    auto msg = m_qMessageIn.pop_front();
+                    auto msg = m_qMessagesIn.pop_front();
 
                     // Pass to message handler
                     OnMessage(msg.remote, msg.msg);
@@ -124,12 +128,12 @@
             
         protected:
             // when a client connects, you reject it by false
-            virtual bool onClientConnect(std::shared_ptr<connection<T>> client){
+            virtual bool OnClientConnect(std::shared_ptr<connection<T>> client){
                 return false;
             }
 
             // when a client appears to have disconnected
-            virtual void onClientDisconnect(std::shared_ptr<connection<T>> client){
+            virtual void OnClientDisconnect(std::shared_ptr<connection<T>> client){
                 
             }
 
@@ -139,7 +143,7 @@
 
         protected:
             // Thread safe Queue for incomming message packets
-            tsqueue<owned_message<T>> m_qMessageIn;
+            tsqueue<owned_message<T>> m_qMessagesIn;
 
             // active validated connections
             std::deque<std::shared_ptr<connection<T>>> m_deqConnections;

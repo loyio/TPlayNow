@@ -37,7 +37,7 @@ namespace tplayn
             // Return true if queue is empty
             bool empty(){
                 std::scoped_lock lock(muxQueue);
-                deqQueue.empty();
+                return deqQueue.empty();
             }
 
 
@@ -67,6 +67,13 @@ namespace tplayn
                 auto t = std::move(deqQueue.back());
                 deqQueue.pop_back();
                 return t;
+            }
+
+            void wait(){
+                while(empty()){
+                    std::unique_lock<std::mutex> ul(muxBlocking);
+                    cvBlocking.wait(ul);
+                }
             }
 
 
