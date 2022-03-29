@@ -82,13 +82,14 @@ int main(){
                 auto msg = c.Incoming().pop_front().msg;
                 switch(msg.header.id){
                     case CustomMsgTypes::ServerAccept:
-                        std::cout << "Server Accepted Connection" << std::endl;
+                        printw("Server Accepted Connection\n");
                         break;
                     case CustomMsgTypes::ServerPing:{
                         std::chrono::system_clock::time_point timeNow = std::chrono::system_clock::now();
                         std::chrono::system_clock::time_point timeThen;
                         msg >> timeThen;
-                        std::cout << "Ping: " << std::chrono::duration<double>(timeNow - timeThen).count() << std::endl;
+                        printw("Ping: %f s\n", std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - timeThen).count()/1000.0f);
+                        //std::cout << "Ping: " << std::chrono::duration<double>(timeNow - timeThen).count() << std::endl;
                         break;
                     }
                     case CustomMsgTypes::MessageAll:{

@@ -1,13 +1,19 @@
 # TPlayNow
-network framework implementation
+Network framework implementation
 
 
 
+</br>
+
+# Thanks
+
+- Dmytro Radchuk 's *Boost.Asio C++ Network Programing Cookbook*
+- [peper0](https://github.com/peper0)'s [qtasio](https://github.com/peper0/qtasio)
+- [Javidx9](https://github.com/OneLoneCoder)'s [olcPixelGameEngine](https://github.com/OneLoneCoder/olcPixelGameEngine)
 
 
 
-
-
+</br>
 
 # License
 
@@ -35,9 +41,11 @@ SOFTWARE.
 
   
 
+------
 
 
-Thanks to [Javidx9](https://github.com/OneLoneCoder)'s [olcPixelGameEngine](https://github.com/OneLoneCoder/olcPixelGameEngine)
+
+</br>
 
 # License (OLC-3)
 
