@@ -1,4 +1,4 @@
-#/*******************************************************************
+/*******************************************************************
 MIT License
 
 Copyright (c) 2022 Loyio Hex
@@ -91,7 +91,7 @@ namespace tplayn
                 if(m_nOwnerType == owner::client){
                     boost::asio::async_connect(m_socket, endpoints, [this](std::error_code ec, boost::asio::ip::tcp::endpoint endpoint){
                                 if(!ec){
-                                    ReadHeader();
+                                    ReadValidation();
                                 }
 
                             });
@@ -243,7 +243,6 @@ namespace tplayn
                                 // Validation data received, and clients should now be validated
                                 if(m_nOwnerType == owner::server){
                                     if(m_nHandshakeIn == m_nHandshakeCheck){
-                                        std::cout << "Client Validated\n";
                                         server->OnClientValidated(this->shared_from_this());
 
 
@@ -257,7 +256,6 @@ namespace tplayn
                                 }else{
                                     // Connection is a client, solve the scramblet
                                     m_nHandshakeOut = scramble(m_nHandshakeIn);
-
 
                                     // Write the result
                                     WriteValidation();
