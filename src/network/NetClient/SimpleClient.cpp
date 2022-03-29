@@ -13,6 +13,8 @@ enum class CustomMsgTypes : uint32_t{
 class CustomClient : public tplayn::net::client_interface<CustomMsgTypes>{
 public:
     void PingServer(){
+
+        std::cout << "Call PingServer Function \n";
         tplayn::net::message<CustomMsgTypes> msg;
         msg.header.id = CustomMsgTypes::ServerPing;
 
@@ -53,12 +55,13 @@ int main(){
             bQuit = true;
         }
         
-
         if(c.IsConnected()){
+            std::cout << "Client Connected, The incoming message is: " << c.Incoming().empty() << std::endl;
             if(!c.Incoming().empty()){
+                std::cout << "Incoming Message have values  !!!!" << std::endl;
                 auto msg = c.Incoming().pop_front().msg;
                 
-                std::cout << "msg : " << msg << std::endl;
+                std::cout << "\n msg : " << msg << std::endl;
 
                 switch(msg.header.id){
                     case CustomMsgTypes::ServerAccept:

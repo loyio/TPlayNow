@@ -30,6 +30,7 @@ protected:
 
     virtual void OnMessage(std::shared_ptr<tplayn::net::connection<CustomMsgTypes>> client, tplayn::net::message<CustomMsgTypes>& msg){
         std::cout << "Get Message " << std::endl;
+        std::cout << "When I get Message " << std::endl;
         switch(msg.header.id){
             case CustomMsgTypes::ServerPing:
             {
@@ -64,7 +65,7 @@ int main(){
     server.Start();
 
     while(1){
-        server.Update(-1, true);
+        server.Update(100, true);
     }
     return 0;
 }

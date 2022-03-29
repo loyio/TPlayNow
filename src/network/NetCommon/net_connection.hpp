@@ -91,8 +91,7 @@ namespace tplayn
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
                                 if(m_qMessagesOut.front().body.size() > 0){
-									std::cout << "Begin to WriteBody " << std::endl;
-									std::this_thread::sleep_for(std::chrono::seconds(3));
+									std::cout << "Begin to WriteBody : (size) " << m_qMessagesOut.front().body.size() << std::endl;
                                     WriteBody();
                                 }else{
                                     m_qMessagesOut.pop_front();
@@ -169,6 +168,7 @@ namespace tplayn
                 if(m_nOwnerType == owner::server){
                     m_qMessagesIn.push_back({ this->shared_from_this(), m_msgTemporaryIn });
                 }else{
+                    std::cout << "AddToIncomingMessageQueue : " << m_msgTemporaryIn << std::endl;
                     m_qMessagesIn.push_back( {nullptr, m_msgTemporaryIn });
                 }
 
