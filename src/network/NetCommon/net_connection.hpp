@@ -1,3 +1,26 @@
+#/*******************************************************************
+MIT License
+
+Copyright (c) 2022 Loyio Hex
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+********************************************************************/
 #pragma once
 
 #include "net_common.hpp"
@@ -36,7 +59,6 @@ namespace tplayn
             void ConnectToClient(uint32_t uid = 0){
                 if(m_nOwnerType == owner::server){
                     if(m_socket.is_open()){
-						std::cout << "Begin to read Header" << std::endl;
                         id = uid;
                         ReadHeader();
                     }
@@ -75,7 +97,6 @@ namespace tplayn
                 boost::asio::post(m_ioc, 
 					[this, msg](){
                             bool bWritingMessage = !m_qMessagesOut.empty();
-							std::cout << "Send Message : " << msg << std::endl;
                             m_qMessagesOut.push_back(msg);
                             if(!bWritingMessage){
                                 WriteHeader();
@@ -91,7 +112,6 @@ namespace tplayn
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
                                 if(m_qMessagesOut.front().body.size() > 0){
-									std::cout << "Begin to WriteBody : (size) " << m_qMessagesOut.front().body.size() << std::endl;
                                     WriteBody();
                                 }else{
                                     m_qMessagesOut.pop_front();
@@ -113,7 +133,6 @@ namespace tplayn
                 boost::asio::async_write(m_socket, boost::asio::buffer(m_qMessagesOut.front().body.data(), m_qMessagesOut.front().body.size()),
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
-								std::cout << "Write body Success ! " << m_qMessagesOut.front() << std::endl;
                                 m_qMessagesOut.pop_front();
 
                                 if(!m_qMessagesOut.empty()){
@@ -132,7 +151,6 @@ namespace tplayn
                 boost::asio::async_read(m_socket, boost::asio::buffer(&m_msgTemporaryIn.header, sizeof(message_header<T>)), 
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
-								std::cout << "Read header success ! : " << m_msgTemporaryIn << std::endl;
                                 if(m_msgTemporaryIn.header.size > 0){
                                     m_msgTemporaryIn.body.resize(m_msgTemporaryIn.header.size);
                                     ReadBody();
@@ -149,11 +167,9 @@ namespace tplayn
 
             // Async ready to read a messag body
             void ReadBody(){
-				std::cout << "Begin to read body !!" << m_msgTemporaryIn <<std::endl;
                 boost::asio::async_read(m_socket, boost::asio::buffer(m_msgTemporaryIn.body.data(), m_msgTemporaryIn.body.size()),
                         [this](std::error_code ec, std::size_t length){
                             if(!ec){
-								std::cout << "Read Body Success ! " << m_msgTemporaryIn << std::endl;
                                 AddToIncomingMessageQueue();
                             }else{
                                 std::cout << "[" << id << "] Read Body Fail. \n";
@@ -168,7 +184,6 @@ namespace tplayn
                 if(m_nOwnerType == owner::server){
                     m_qMessagesIn.push_back({ this->shared_from_this(), m_msgTemporaryIn });
                 }else{
-                    std::cout << "AddToIncomingMessageQueue : " << m_msgTemporaryIn << std::endl;
                     m_qMessagesIn.push_back( {nullptr, m_msgTemporaryIn });
                 }
 

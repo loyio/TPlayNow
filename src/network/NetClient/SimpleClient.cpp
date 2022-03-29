@@ -1,3 +1,26 @@
+/*******************************************************************
+MIT License
+
+Copyright (c) 2022 Loyio Hex
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+********************************************************************/
 #include "../NetCommon/tplayn_net.hpp"
 #include <ncurses.h>
 
@@ -14,7 +37,6 @@ class CustomClient : public tplayn::net::client_interface<CustomMsgTypes>{
 public:
     void PingServer(){
 
-        std::cout << "Call PingServer Function \n";
         tplayn::net::message<CustomMsgTypes> msg;
         msg.header.id = CustomMsgTypes::ServerPing;
 
@@ -56,13 +78,8 @@ int main(){
         }
         
         if(c.IsConnected()){
-            std::cout << "Client Connected, The incoming message is: " << c.Incoming().empty() << std::endl;
             if(!c.Incoming().empty()){
-                std::cout << "Incoming Message have values  !!!!" << std::endl;
                 auto msg = c.Incoming().pop_front().msg;
-                
-                std::cout << "\n msg : " << msg << std::endl;
-
                 switch(msg.header.id){
                     case CustomMsgTypes::ServerAccept:
                         std::cout << "Server Accepted Connection" << std::endl;
