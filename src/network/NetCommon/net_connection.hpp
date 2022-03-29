@@ -27,9 +27,14 @@ SOFTWARE.
 #include "net_tsqueue.hpp"
 #include "net_message.hpp"
 
+
 namespace tplayn
-{ namespace net
+{ 
+    namespace net
     {
+        template<typename T>
+        class server_interface;
+
         template<typename T>
         class connection : public std::enable_shared_from_this<connection<T>>{
         public:
@@ -45,6 +50,17 @@ namespace tplayn
             connection(owner parent, boost::asio::io_context& ioc, boost::asio::ip::tcp::socket socket, tsqueue<owned_message<T>>& qIn)
                 : m_ioc(ioc), m_socket(std::move(socket)), m_qMessagesIn(qIn){
                     m_nOwnerType = parent;
+
+                    if(m_nOwnerType == owner::server){
+                        // Construct random data for the client to transform and send back for validation
+                        m_nHandshakeOut = uint64_t(std::chrono::system_clock::now().time_since_epoch().count());
+
+                        // Pre-calculate the result for cheking when the client responds
+                        m_nHandshakeCheck = scramble(m_nHandshakeOut);
+                    }else{
+                        m_nHandshakeIn = 0;
+                        m_nHandshakeOut = 0;
+                    }
             }
 
             virtual ~connection() {}
@@ -56,11 +72,16 @@ namespace tplayn
             
         public:
 
-            void ConnectToClient(uint32_t uid = 0){
+            void ConnectToClient(tplayn::net::server_interface<T>* server, uint32_t uid = 0){
                 if(m_nOwnerType == owner::server){
                     if(m_socket.is_open()){
                         id = uid;
-                        ReadHeader();
+
+                        // to validate the client, write the handshake data
+                        WriteValidation();
+
+                        // wait asynchronously for the validation data sent back from the client
+                        ReadValidation(server);
                     }
                 }
             }
@@ -191,6 +212,64 @@ namespace tplayn
             }
 
 
+            // Encrypt data
+            uint64_t scramble(uint64_t nInput){
+                uint64_t out = nInput ^ 0xD34E3AB6AF1E0B5F;
+                out = (out & 0xF0F0F0F0F0F0F0F0) >> 4 | (out & 0x0F0F0F0F0F0F0F0F) << 4;
+                return out ^ 0xB3A5A3CC47EE45FD;
+            }
+
+
+            // Async write the validation data to the client
+            void WriteValidation(){
+                boost::asio::async_write(m_socket, boost::asio::buffer(&m_nHandshakeOut, sizeof(uint64_t)),
+                        [this](std::error_code ec, std::size_t length){
+                            if(!ec){
+                                // Validation data sent, and clients should sit and wait for a response
+                                if(m_nOwnerType == owner::client){
+                                    ReadHeader();
+                                }
+                            }else{
+                                m_socket.close();
+                            }
+                        });
+            }
+
+            // Async read the validation data from the client
+            void ReadValidation(tplayn::net::server_interface<T>* server = nullptr){
+                boost::asio::async_read(m_socket, boost::asio::buffer(&m_nHandshakeIn, sizeof(uint64_t)),
+                        [this, server](std::error_code ec, std::size_t length){
+                            if(!ec){
+                                // Validation data received, and clients should now be validated
+                                if(m_nOwnerType == owner::server){
+                                    if(m_nHandshakeIn == m_nHandshakeCheck){
+                                        std::cout << "Client Validated\n";
+                                        server->OnClientValidated(this->shared_from_this());
+
+
+                                        // Sit waiting to receive data now
+                                        ReadHeader();
+                                    }else{
+                                        // Client gave incorrect validation data, disconnect
+                                        std::cout << "Client Disconnected (Validation Failed)\n";
+                                        m_socket.close();
+                                    }
+                                }else{
+                                    // Connection is a client, solve the scramblet
+                                    m_nHandshakeOut = scramble(m_nHandshakeIn);
+
+
+                                    // Write the result
+                                    WriteValidation();
+                                }
+                            }else{
+                                m_socket.close();
+                            }
+                        });
+            }
+
+
+
 
         protected:
             // unique socket to remote
@@ -213,6 +292,12 @@ namespace tplayn
             owner m_nOwnerType = owner::server;
 
             uint32_t id = 0;
+
+
+            // Handshake Validation
+            uint64_t m_nHandshakeOut = 0;
+            uint64_t m_nHandshakeIn = 0;
+            uint64_t m_nHandshakeCheck = 0;
 
         };
 

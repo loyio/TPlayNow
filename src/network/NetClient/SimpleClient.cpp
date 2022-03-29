@@ -39,9 +39,10 @@ public:
 
         tplayn::net::message<CustomMsgTypes> msg;
         msg.header.id = CustomMsgTypes::ServerPing;
-
         // please check your server and client is same system
-        std::chrono::system_clock::time_point timeNow = std::chrono::system_clock::now();
+        auto timeNow = std::chrono::high_resolution_clock::now();
+
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         msg << timeNow;
         
@@ -58,6 +59,7 @@ int main(){
     scrollok(stdscr, TRUE);
     noecho();
     keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
 
     CustomClient c;
     c.Connect("127.0.0.1", 60000);
@@ -72,8 +74,7 @@ int main(){
         
         if(ch == 49){
             c.PingServer();
-        }
-        else if(ch == 'q'){
+        }else if(ch == 'q'){
             bQuit = true;
         }
         
@@ -85,10 +86,10 @@ int main(){
                         printw("Server Accepted Connection\n");
                         break;
                     case CustomMsgTypes::ServerPing:{
-                        std::chrono::system_clock::time_point timeNow = std::chrono::system_clock::now();
-                        std::chrono::system_clock::time_point timeThen;
+                        auto timeNow = std::chrono::high_resolution_clock::now();
+                        std::chrono::time_point<std::chrono::high_resolution_clock> timeThen;
                         msg >> timeThen;
-                        printw("Ping: %f s\n", std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - timeThen).count()/1000.0f);
+                        printw("Ping: %f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(timeNow-timeThen).count()/1000.0f);
                         //std::cout << "Ping: " << std::chrono::duration<double>(timeNow - timeThen).count() << std::endl;
                         break;
                     }

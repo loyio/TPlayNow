@@ -78,7 +78,7 @@ SOFTWARE.
                             // connection allow, add to container
                             m_deqConnections.push_back(std::move(newconn));
 
-                            m_deqConnections.back()->ConnectToClient(nIDCounter++);
+                            m_deqConnections.back()->ConnectToClient(this, nIDCounter++);
 
                             std::cout << "[" << m_deqConnections.back()->GetID() << "] Connection Approved" << std::endl;
                         }else{
@@ -163,6 +163,13 @@ SOFTWARE.
 
             // called when a message arrived
             virtual void OnMessage(std::shared_ptr<connection<T>> client, message<T>& msg){
+            }
+
+
+        public:
+            // Called when a client validated
+            virtual void OnClientValidated(std::shared_ptr<connection<T>> client){
+                
             }
 
         protected:
